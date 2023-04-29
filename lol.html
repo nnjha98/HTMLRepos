@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Camera Example</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+    #video, #canvas {
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <video id="video" width="100%" height="100%"></video>
+  <canvas id="canvas" width="100%" height="100%"></canvas>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set the video size to the available window size
+    video.width = window.innerWidth;
+    video.height = window.innerHeight;
+
+    // Ask for camera permission and start the camera
+    navigator.mediaDevices.getUserMedia({video: true})
+      .then((stream) => {
+        video.srcObject = stream;
+        video.play();
+      })
+      .catch((error) => {
+        console.log('Error accessing camera:', error);
+      });
+
+    // Set the canvas size to the available window size
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Draw the video frame to the canvas and capture one image
+    function captureImage() {
+      // Pause the video to freeze the frame
+      video.pause();
+
+      // Draw the video frame to the canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Get the image data from the canvas
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Calculate the position to center the image on the canvas
+      const x = (canvas.width - imageData.width) / 2;
+      const y = (canvas.height - imageData.height) / 2;
+
+      // Draw the captured image centered on the canvas
+      ctx.putImageData(imageData, x, y);
+
+      // Resume the video
+      video.play();
+    }
+
+    // Call the captureImage function when the user clicks the canvas
+    canvas.addEventListener('click', captureImage);
+  </script>
+</body>
+</html>
